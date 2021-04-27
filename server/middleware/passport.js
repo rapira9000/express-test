@@ -7,7 +7,6 @@ const options = {
     jwtFromRequest: extractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: config.TOKEN_USER_SECRET_KEY
 };
-console.log(options);
 
 module.exports = (passport) => {
     passport.use(

@@ -1,4 +1,4 @@
-module.exports = () => ({
+module.exports = ({
     replaceBackSlashesFilePath: (filePath) => {
         const pattern = /\\/g;
         return filePath.replace(pattern, '/');
@@ -14,5 +14,7 @@ module.exports = () => ({
             limit: parseInt(limit),
             skip: skip
         }
-    }
+    },
+
+    checkPostIsLikeDisable: (postCheck, postsDisabledLike) => ({...postCheck, isDisableLike: postsDisabledLike.includes(postCheck._id.toString())})
 });

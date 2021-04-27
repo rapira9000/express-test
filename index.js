@@ -8,8 +8,20 @@ const morgan = require('morgan');
 const config = require('./server/config');
 
 const app = express();
+const http = require("http").Server(app);
+
+const io = require('socket.io')(http, {
+    path: '/websocket/',
+    cors: {
+        origin: '*',
+        // origin: config.CORS_DOMAINS_ALLOWED,
+        credentials: true
+    }
+});
+
 const router = express.Router;
 
+// passport init
 app.use(passport.initialize());
 require('./server/middleware/passport')(passport);
 
@@ -17,7 +29,7 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: config.CORS_DOMAINS_ALLOWED,
     credentials: true
 }));
 
@@ -56,8 +68,13 @@ try {
         app.use(`/api/${name}`, controllers[name]({router, actions, models, lib}));
     }
 
+    // webSockets init
+    const webSockets = require('./server/websocket/websockets')(io).initWebSocket();
+
+
 } catch (e) {
     console.error(e)
 }
 
-app.listen(config.LISTEN_PORT);
+http.listen(config.LISTEN_PORT);
+

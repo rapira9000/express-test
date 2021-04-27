@@ -4,17 +4,10 @@ const config = require('../config');
 
 module.exports = ({users}) => ({
     followUser: (arr, userId) => {
-        let followed = false;
         if (!arr.includes(userId)) {
             arr.push(userId);
-        } else {
-            followed = true;
         }
-
-        return {
-            followersIds: arr,
-            followed: followed
-        }
+        return arr;
     },
 
     unFollowUser: (arr, userId) => {
@@ -33,10 +26,11 @@ module.exports = ({users}) => ({
     },
 
     checkIsFollowedUsers: (users, authUserFollowedIds) => {
+        authUserFollowedIds = authUserFollowedIds.map(item => (item.toString()));
         return users.map((item) => {
             return {
                 ...item._doc,
-                isFollow: authUserFollowedIds.includes(item._id)
+                isFollow: authUserFollowedIds.includes(item._id.toString())
             };
         });
     },

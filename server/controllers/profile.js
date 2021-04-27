@@ -28,7 +28,7 @@ module.exports = ({router, actions, models, lib}) => {
     routes.post('/update/avatar', FOR_AUTH_USER_ONLY, upload.single("userAvatar"), async (req, res) => {
         const removeOldAvatarRequest =  await profile.removeUserAvatar(req.user._id);
         if (removeOldAvatarRequest.done) {
-            const updatedRequest = await profile.updateUserAvatar(req.user._id, Helpers().replaceBackSlashesFilePath(req.file.path));
+            const updatedRequest = await profile.updateUserAvatar(req.user._id, Helpers.replaceBackSlashesFilePath(req.file.path));
             res.send(updatedRequest);
         } else {
             res.send(removeOldAvatarRequest)
@@ -42,7 +42,7 @@ module.exports = ({router, actions, models, lib}) => {
     });
 
     routes.get('/get/post', FOR_AUTH_USER_ONLY, async (req, res) => {
-        const getPost = await profile.getPosts(req.user._id, req.query.page, req.query.limit, models.posts);
+        const getPost = await profile.getPosts(req.user._id, req.query.page, req.query.limit, models);
         res.status(getPost.status).send(getPost);
     });
 

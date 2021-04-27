@@ -20,7 +20,7 @@ const schema = new Schema({
     userDescription: String,
     userAvatar: String,
     gender: String,
-    followed: Array
+    followed: Array,
 });
 
 const Users = model('Users', schema);

@@ -3,6 +3,7 @@ const Helpers = require('../functions/helpers');
 const fs = require('fs');
 const config = require('../config');
 const responseToRequest = {...config.RESPONSE_TO_REQUEST};
+const newsAction = require('../actions/news');
 
 module.exports = (users) => ({
     getProfileData: async (userId, profileLib) => {
@@ -66,10 +67,10 @@ module.exports = (users) => ({
         }
     },
 
-    createPost: async (userId, content, dbPost) => {
+    createPost: async (user, content, dbPost) => {
         try {
             const newPost = await new dbPost.Instance({
-                userId,
+                user,
                 content
             }).save();
 
@@ -80,22 +81,9 @@ module.exports = (users) => ({
         }
     },
 
-    getPosts: async (userId, page = 1, limit = 5, dbPost) => {
+    getPosts: async (user, page = 1, limit = 5, models) => {
         try {
-            const pagiParams = Helpers().calculatePagination(page, limit);
-            responseToRequest.posts = await dbPost.Instance.
-            find({
-                userId
-            }).
-            sort({
-                dateCreated: -1
-            }).
-            skip(pagiParams.skip).
-            limit(pagiParams.limit);
-
-            responseToRequest.countPosts = await dbPost.Instance.countDocuments({userId});
-
-            return responseToRequest;
+            return await newsAction(models).getNews(user, page, limit, true);
         } catch (error) {
             return errorHendler(500, error)
         }

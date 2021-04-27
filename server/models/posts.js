@@ -3,21 +3,16 @@ const { Schema, model } = require('mongoose');
 const schema = new Schema({
     name: String,
     content: String,
-    // parentId: {
-    //     type: Schema.Types.ObjectId,
-    //     ref: 'posts'
-    // },
-    userId: {
-        type: Schema.Types.ObjectId,
-        ref: 'users'
-    },
-    likes: {
-        type: String,
-        default: '0'
+    user: {
+        type: Schema.Types.ObjectId
     },
     dateCreated: {
         type: Date,
         default: Date.now
+    },
+    likes: {
+        type: Number,
+        default: 0
     }
 });
 

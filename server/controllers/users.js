@@ -1,7 +1,6 @@
 const passport = require('passport');
 const FOR_AUTH_USER_ONLY =  passport.authenticate('jwt', {session: false});
 
-
 module.exports = ({router, actions, models, lib}) => {
     const routes = router();
     const users = actions.users(models);
@@ -12,6 +11,15 @@ module.exports = ({router, actions, models, lib}) => {
         const limit = parseInt(req.query.limit);
         const authUserId = req.user._id ? req.user._id : false;
         const response = await users.getAllUsers(authUserId, page, limit, libUsers);
+
+        res.status(response.status).send(response);
+    });
+
+    routes.get('/get-followed-list', FOR_AUTH_USER_ONLY, async (req, res) => {
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit);
+        const authUserId = req.user._id ? req.user._id : false;
+        const response = await users.getFollowedUsers(authUserId, page, limit, libUsers);
 
         res.status(response.status).send(response);
     });

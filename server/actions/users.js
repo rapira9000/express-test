@@ -2,6 +2,7 @@ const errorHendler = require('../functions/errors');
 const Helpers = require('../functions/helpers');
 const config = require('../config');
 const responseToRequest = {...config.RESPONSE_TO_REQUEST};
+const mongoose = require('mongoose');
 
 const self = module.exports = ({users}) => ({
     getAllUsers: async (userId, page, limit, libUsers) => {
@@ -14,11 +15,10 @@ const self = module.exports = ({users}) => ({
         } catch (err) {
             return errorHendler(500, err);
         }
-
     },
 
     getAll: async (page, limit) => {
-        const pagiParams = Helpers().calculatePagination(page, limit);
+        const pagiParams = Helpers.calculatePagination(page, limit);
         return await users.Instance.find().skip(pagiParams.skip).limit(pagiParams.limit);
     },
 
@@ -60,9 +60,9 @@ const self = module.exports = ({users}) => ({
         try {
             let followedIdsArr = await self({users}).getFollowUnFollowUser(authUserId);
             let followedIds = libUsers.clearArray(followedIdsArr.followed || []);
-            let followedData = follow ? await libUsers.followUser(followedIds, followedUserId) : await libUsers.unFollowUser(followedIds, followedUserId);
-            await self({users}).updateUserFollowers(authUserId, followedData.followersIds);
-            return responseToRequest
+            let followedFilterIds = follow ? await libUsers.followUser(followedIds, followedUserId) : await libUsers.unFollowUser(followedIds, followedUserId);
+            await self({users}).updateUserFollowers(authUserId, followedFilterIds);
+            return responseToRequest;
         } catch (err) {
             errorHendler(500, err);
         }
@@ -154,4 +154,28 @@ const self = module.exports = ({users}) => ({
             return errorHendler(409, {message: `user with email ${userEmail} is no exist`});
         }
     },
+
+    getFollowedUsers: async (authUserId, page, limit, libUsers) => {
+        try {
+            const followedIdsArr = await self({users}).getFollowUnFollowUser(authUserId);
+            const followedIds = libUsers.clearArray(followedIdsArr.followed || []);
+            const followedIdsObjectId = followedIds.map(item => (mongoose.Types.ObjectId(item)));
+            const pagiParams = Helpers.calculatePagination(page, limit);
+            const usersQuery = await users.Instance.find(
+                {_id: {$in: followedIdsObjectId}},
+                {
+                    userName: true,
+                    userNickName: true,
+                    userAvatar: true,
+
+                }
+            ).skip(pagiParams.skip).limit(pagiParams.limit);
+
+            responseToRequest.items = await libUsers.checkIsFollowedUsers(usersQuery, followedIds);
+            responseToRequest.itemsCount = await await users.Instance.countDocuments({_id: {$in: followedIdsObjectId}});
+            return responseToRequest;
+        } catch (e) {
+            return errorHendler(500, e);
+        }
+    }
 });
